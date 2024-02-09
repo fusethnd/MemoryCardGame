@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct AspectVGrid<Item, ItemView>: View {
+struct AspectVGrid<Item: Identifiable, ItemView: View>: View {
     var items: [Item]
     var aspectRatio = 1 as CGFloat
+    var content: (Item) -> ItemView
     
     var body: some View {
         GeometryReader { geometry in
@@ -18,6 +19,14 @@ struct AspectVGrid<Item, ItemView>: View {
                 size: geometry.size,
                 atAspecRatio: aspectRatio
             )
+            LazyVGrid (columns: [GridItem(.adaptive(minimum: gridItemSize), spacing : 0)],
+                // between column
+                spacing : 0) { // between row
+                    ForEach(items) { item in
+                        content(item)
+                            .aspectRatio(aspectRatio, contentMode:  .fit)
+                    }
+            }
         }
     }
     
@@ -35,16 +44,16 @@ struct AspectVGrid<Item, ItemView>: View {
             columnCount += 1
         } while columnCount < count
         
-        return 1
+        return min(size.width / count, size.height * aspectRatio)
     }
 }
 
-struct SwiftUIView_Previews: PreviewProvider {
-    static var previews: some View {
-        SwiftUIView()
-    }
-}
+//struct SwiftUIView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        AspectVGrid()
+//    }
+//}
 
-#Preview {
-    SwiftUIView()
-}
+//#Preview {
+//    SwiftUIView()
+//}
